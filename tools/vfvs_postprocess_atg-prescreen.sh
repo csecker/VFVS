@@ -39,7 +39,7 @@ wait
 
 # Generating new todo files for the ATG Primary Screens
 # requires conda 
-for size in $@; do for file in *sparse-metrics; do echo python ~/scripts/vfvs_atg_prepare_stage1.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${file/.*}.all.todo.$size $size ; done ; done | parallel -j 10
+for size in $@; do for file in *sparse-metrics; do echo python templates/create_activitymap.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${file/.*}.all.todo.$size $size ; done ; done | parallel -j 10
 
 wait
 
