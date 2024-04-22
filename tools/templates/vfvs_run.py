@@ -387,13 +387,51 @@ def get_attrs(ligand_format, ligand_path, attrs = ['smi']):
     return attributes
 
 
+def obabel_check_energy(item, input_file, max_energy):
+
+    #step_timer_start = time.perf_counter()
+
+    #with open(input_file, "r") as read_file:
+    #    lines = read_file.readlines()
+
+    try:
+        ret = subprocess.run(['obenergy', input_file], capture_output=True, text=True, timeout=item['obenergy_timeout'])
+    except subprocess.TimeoutExpired as err:
+        item['log']['reason'] = 'obenergy timed out'
+        logging.error(item['log']['reason'])
+        logging.error(f"stdout:\n{ret.stdout}\nstderr:{ret.stderr}\n")
+
+    output_lines = ret.stdout.splitlines()
+
+    kcal_to_kJ = 4.184
+
+    if(len(output_lines) > 0):
+        # obabel v2
+        match = re.search(r"^TOTAL\s+ENERGY\s+\=\s+(?P<energy>-?\d+\.?\d*)\s+(?P<energy_unit>(kcal|kJ))", output_lines[-1])
+        if(match):
+            energy_value = float(match.group('energy'))
+            if(match.group('energy_unit') == "kcal"):
+                energy_value *= kcal_to_kJ
+
+            if(energy_value <= float(max_energy)):
+                return 1
+
+            if(energy_value > float(max_energy)):
+                item['log']['reason'] = f"energy-check failed for {item['collection_key']} {item['ligand_key']} {item['scenario_key']} ({energy_value} > {max_energy})"
+                logging.error(item['log']['reason'])
+                return 0
+
+    item['log']['reason'] = 'No energy-check output'
+    logging.error(item['log']['reason'])
+    return 0
+
+
 def posebusters_check(item, input_file, receptor_file, timeout):
-    step_timer_start = time.perf_counter()
 
     try:
         ret = subprocess.run(['bust', input_file, '-p', receptor_file, '--top-n', '1', '--outfmt', 'csv'], capture_output=True, text=True, timeout=timeout)
     except subprocess.TimeoutExpired as err:
-        item['log']['reason'] = 'bust timed out'
+        item['log']['reason'] = f"bust timed out for {item['collection_key']} {item['ligand_key']} {item['scenario_key']}"
         logging.error(item['log']['reason'])
         return 0
 
@@ -412,9 +450,12 @@ def posebusters_check(item, input_file, receptor_file, timeout):
         if(check):
             return 1
         else:
+            item['log']['reason'] = f"One or more docking pose checks failed for {item['collection_key']} {item['ligand_key']} {item['scenario_key']}"
+            logging.error(item['log']['reason'])
             return 0
 
-    print("Pose check with posebusters failed.")
+    item['log']['reason'] = f"No pose check output for {item['collection_key']} {item['ligand_key']} {item['scenario_key']}"
+    logging.error(item['log']['reason'])
     return 0
 
 
@@ -444,6 +485,9 @@ def submit_ligand_for_docking(ctx, docking_queue, ligand_name, ligand_path, coll
                 'temp_dir': temp_dir,
                 'attrs': ligand_attrs,
                 'output_dir': str(ligand_directory_directory),
+                'run_energy_check': int(ctx['main_config']['run_energy_check']),
+                'energy_max': int(ctx['main_config']['energy_max']),
+                'obenergy_timeout': int(ctx['main_config']['obenergy_timeout']),
                 'run_pose_check': int(ctx['main_config']['run_pose_check']),
                 'pose_check_timeout': int(ctx['main_config']['pose_check_timeout'])
             }
@@ -2186,7 +2230,7 @@ def docking_finish_vina(item, ret):
         item['score'] = float(matches['value'])
         item['status'] = "success"
 
-        if(item['run_pose_check'] == 1):
+        if(item['run_pose_check'] == 1 or item['run_energy_check'] == 1):
 
             # Load in config file:
             with open(item['config_path']) as fd:
@@ -2197,13 +2241,33 @@ def docking_finish_vina(item, ret):
 
             # Convert docking output to sdf (first model only)
             sdf_file = item['output_path'] + '.sdf'
-            subprocess.run(['obabel', '-ipdbqt', item['output_path'], '-f', '1', '-l', '1', '-osdf', '-O', sdf_file])
-            pdb_file = os.path.join(item['input_files_dir'], config_['receptor'].replace('pdbqt', 'pdb'))
+            try:
+                ret = subprocess.run(['obabel', '-ipdbqt', item['output_path'], '-f', '1', '-l', '1', '-osdf', '-O', sdf_file],
+                                     capture_output=True, text=True, timeout=item['obenergy_timeout'])
+            except subprocess.TimeoutExpired as err:
+                item['log']['reason'] = 'obabel timed out'
+                logging.error(item['log']['reason'])
+                logging.error(f"stdout:\n{ret.stdout}\nstderr:{ret.stderr}\n")
 
-            # Run pose check
-            if(posebusters_check(item, sdf_file, pdb_file, item['pose_check_timeout']) != 1):
-                item['score'] = None
-                item['status'] = "failed"
+            if (item['run_pose_check'] == 1):
+
+                # Prepare receptor file if needed
+                pdb_file = os.path.join(item['input_files_dir'], config_['receptor'].replace('pdbqt', 'pdb'))
+                if not os.path.exists(pdb_file):
+                    logging.error(f"run_pose_check is set to 1, but no {pdb_file} found, exiting...")
+                    sys.exit(1)
+
+                # Run pose check
+                if(posebusters_check(item, sdf_file, pdb_file, item['pose_check_timeout']) != 1):
+                    item['score'] = None
+                    item['status'] = "failed"
+
+            if(item['run_energy_check'] == 1):
+
+                # Run energy check
+                if(obabel_check_energy(item, sdf_file, item['energy_max']) != 1):
+                    item['score'] = None
+                    item['status'] = "failed"
 
     else:
         item['log']['reason'] = f"Could not find score"
