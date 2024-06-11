@@ -376,8 +376,13 @@ def get_attrs(ligand_format, ligand_path, attrs = ['smi']):
                     attributes['smi'] = match.group('smi')
                     attributes_found += 1
 
+                match = re.search(r"SMILES_orig:\s*(?P<smi_orig>.*)$", line)
+                if(match and 'smi_orig' in attrs):
+                    attributes['smi_orig'] = match.group('smi_orig')
+                    attributes_found += 1
+
                 match = re.search(r"\* Heavy atom count:\s*(?P<hacount>.*)$", line)
-                if(match):
+                if(match and 'heavy_atom_count' in attrs):
                     attributes['heavy_atom_count'] = match.group('hacount')
                     attributes_found += 1
 
