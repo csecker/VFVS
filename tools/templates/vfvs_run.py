@@ -386,6 +386,16 @@ def get_attrs(ligand_format, ligand_path, attrs = ['smi']):
                     attributes['heavy_atom_count'] = match.group('hacount')
                     attributes_found += 1
 
+                match = re.search(r"\* logp_obabel:\s*(?P<logp_obabel>.*)$", line)
+                if (match and 'logp_obabel' in attrs):
+                    attributes['logp_obabel'] = match.group('logp_obabel')
+                    attributes_found += 1
+
+                match = re.search(r"\* obenergy:\s*(?P<obenergy>.*)$", line)
+                if (match and 'obenergy' in attrs):
+                    attributes['obenergy'] = match.group('obenergy')
+                    attributes_found += 1
+
                 if(attributes_found >= len(attrs)):
                     break
 
