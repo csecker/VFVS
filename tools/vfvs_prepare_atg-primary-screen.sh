@@ -25,6 +25,8 @@ fi
 # Getting the score averages for each tranche
 cd ../output-files
 tranche_scoring_mode=$2
+echo tranche_scoring_mode: ${tranche_scoring_mode}
+
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for file in *clean.csv; do
     for i in {0..17}; do
