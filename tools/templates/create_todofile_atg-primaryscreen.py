@@ -134,7 +134,7 @@ if tranche_scoring_mode == "dimension_averaging":
     df_ERS_todo_added[df_ERS_todo_added.Selected == "yes"][["Collection", "LigandCount"]].to_csv(sys.argv[5],index=False,mode='a',header=False,sep=' ')
 
 
-elif tranche_scoring_mode == "tranche_min_score" or "tranche_ave_score":
+elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
 
     # Settings
     pd.set_option('display.max_rows', 10)
