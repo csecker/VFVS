@@ -30,7 +30,9 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
 done
 
 # Cleaning the CSV files
-for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' > ${ds}.clean.csv ; done
+for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
+  awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' > ${ds}.clean.csv
+done
 
 wait 
 

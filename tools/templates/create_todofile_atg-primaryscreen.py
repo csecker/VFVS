@@ -142,22 +142,22 @@ elif tranche_scoring_mode == "tranche_min_score" or "tranche_ave_score":
     print("Loading library collections file...")
     df_library_collections = pd.read_csv('Enamine_REAL_Space_2022q12.todo.csv', dtype={'Collection': str})
     print("Loading prescreening docking score file...")
-    df_prescreen_scores = pd.read_csv(sys.argv[1])
+    df_prescreen_scores = pd.read_csv(sys.argv[1],usecols=[0, 3])
 
     # Calculating the scores for each tranche
     print("Calculating scores for each tranche to obtain activity map...")
     tranche_score_mode = "min_score"
-    if tranche_score_mode == "min_score":
+    if tranche_score_mode == "tranche_min_score":
         # Calculate minimum score for each Tranche in df_library_tranches
-        tranche_scores = df_prescreen_scores.groupby('Tranche')['Score'].min().reset_index()
-        tranche_scores.rename(columns={'Score': 'TrancheScore'}, inplace=True)
-    elif tranche_score_mode == "ave_score":
+        tranche_scores = df_prescreen_scores.groupby('Tranche')['ScoreMin'].min().reset_index()
+        tranche_scores.rename(columns={'ScoreMin': 'TrancheScore'}, inplace=True)
+    elif tranche_score_mode == "tranche_ave_score":
         # Calculate average score for each Tranche in df_library_tranches
-        tranche_scores = df_prescreen_scores.groupby('Tranche')['Score'].mean().reset_index()
-        tranche_scores.rename(columns={'Score': 'TrancheScore'}, inplace=True)
+        tranche_scores = df_prescreen_scores.groupby('Tranche')['ScoreMin'].mean().reset_index()
+        tranche_scores.rename(columns={'ScoreMin': 'TrancheScore'}, inplace=True)
     else:
         # Handle error: invalid mode
-        raise ValueError("Invalid tranche_score_mode. Please specify either 'min_score' or 'ave_score'.")
+        raise ValueError("Invalid tranche_score_mode. Please specify either 'tranche_min_score' or 'tranche_ave_score'.")
 
     # Merging tranche_scores to df_library_collections
     df_library_collections = pd.merge(df_library_collections, tranche_scores, on='Tranche', how='left')
