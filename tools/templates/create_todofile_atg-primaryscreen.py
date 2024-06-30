@@ -27,6 +27,8 @@ print("Loading library tranches file...")
 df_library_tranches = pd.read_csv(sys.argv[3])
 tranche_scoring_mode = sys.argv[4]
 print("tranche_scoring_mode: " + tranche_scoring_mode)
+print("tranche_scoring_mode: " + tranche_scoring_mode.strip())
+print(f"tranche_scoring_mode: '{tranche_scoring_mode}'")
 ligand_count_aim = int(os.fsencode(sys.argv[6]))
 
 if tranche_scoring_mode == "dimension_averaging":
