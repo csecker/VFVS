@@ -26,9 +26,6 @@ df_library_collections = pd.read_csv(sys.argv[2], dtype={'Collection': str})
 print("Loading library tranches file...")
 df_library_tranches = pd.read_csv(sys.argv[3])
 tranche_scoring_mode = sys.argv[4]
-print("tranche_scoring_mode: " + tranche_scoring_mode)
-print("tranche_scoring_mode: " + tranche_scoring_mode.strip())
-print(f"tranche_scoring_mode: '{tranche_scoring_mode}'")
 ligand_count_aim = int(os.fsencode(sys.argv[6]))
 
 if tranche_scoring_mode == "dimension_averaging":
@@ -150,11 +147,11 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     # Calculating the scores for each tranche
     print("Calculating scores for each tranche to obtain activity map...")
     tranche_score_mode = "min_score"
-    if tranche_score_mode == "tranche_min_score":
+    if tranche_scoring_mode == "tranche_min_score":
         # Calculate minimum score for each Tranche in df_library_tranches
         tranche_scores = df_prescreen_scores.groupby('Tranche')['ScoreMin'].min().reset_index()
         tranche_scores.rename(columns={'ScoreMin': 'TrancheScore'}, inplace=True)
-    elif tranche_score_mode == "tranche_ave_score":
+    elif tranche_scoring_mode == "tranche_ave_score":
         # Calculate average score for each Tranche in df_library_tranches
         tranche_scores = df_prescreen_scores.groupby('Tranche')['ScoreMin'].mean().reset_index()
         tranche_scores.rename(columns={'ScoreMin': 'TrancheScore'}, inplace=True)
