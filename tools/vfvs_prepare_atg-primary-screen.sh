@@ -23,6 +23,7 @@ if [ "$#" -le "1" ]; then
 fi
 
 # Getting the score averages for each tranche
+cd ../output-files
 tranche_scoring_mode=$2
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for file in *clean.csv; do
@@ -66,6 +67,7 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do for size in ${@:2}; do cp -v ../output-files/${ds}.all.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all ; done; done
 
 
+cd ../tools
 
 #for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do for size in ${@:2}; do ( cd ../../atg-primaryscreen_${size}_${ds}/tools; ./vfvs_prepare_folders.py ) ;  done; done
 #for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do for size in ${@:2}; do echo "( cd ../../atg-primaryscreen_${size}_${ds}/tools; ./vfvs_prepare_workunits.py )" ; done; done | parallel -j 10 --ungroup
