@@ -16,10 +16,6 @@ import os
 import sys
 from IPython.display import display, HTML
 
-# Settings
-pd.set_option('display.max_rows', 10)
-display(HTML("<style>.container { width:100% !important; }</style>"))
-
 # Arguments
 print("Loading library collections file...")
 df_library_collections = pd.read_csv(sys.argv[2], dtype={'Collection': str})
@@ -176,6 +172,7 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
 
     # Loop until we have enough ligands
     print("Selecting ligand collections for ATG Primary Screen...")
+    print("")
     while ligands_selected < ligand_count_aim:
         # Selecting next ligand collection
         df_library_collections.iloc[i, df_library_collections.columns.get_loc('Selected')] = True
