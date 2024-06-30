@@ -21,8 +21,10 @@ pd.set_option('display.max_rows', 10)
 display(HTML("<style>.container { width:100% !important; }</style>"))
 
 # Arguments
-df_library_collections = pd.read_csv(sys.argv[2])
-df_ERS_tranches = pd.read_csv(sys.argv[3])
+print("Loading library collections file...")
+df_library_collections = pd.read_csv(sys.argv[2], dtype={'Collection': str})
+print("Loading library tranches file...")
+df_library_tranches = pd.read_csv(sys.argv[3])
 tranche_scoring_mode = sys.argv[4]
 ligand_count_aim = int(os.fsencode(sys.argv[6]))
 
@@ -87,7 +89,7 @@ if tranche_scoring_mode == "dimension_averaging":
 
         # Calculating the number of ligands selected
         ligands_selected_previous = ligands_selected
-        ligands_selected = df_ERS_tranches[df_ERS_tranches.Tranche.str.contains(regex)]['LigandCount'].sum()
+        ligands_selected = df_library_tranches[df_library_tranches.Tranche.str.contains(regex)]['LigandCount'].sum()
 
         # Printing status
         print("")
@@ -139,8 +141,6 @@ elif tranche_scoring_mode == "tranche_min_score" or "tranche_ave_score":
     display(HTML("<style>.container { width:100% !important; }</style>"))
 
     # Loading the data from files
-    print("Loading library collections file...")
-    df_library_collections = pd.read_csv('Enamine_REAL_Space_2022q12.todo.csv', dtype={'Collection': str})
     print("Loading prescreening docking score file...")
     df_prescreen_scores = pd.read_csv(sys.argv[1],usecols=[0, 3])
 
