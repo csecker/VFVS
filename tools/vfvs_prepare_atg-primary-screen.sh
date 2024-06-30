@@ -41,13 +41,13 @@ wait
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for size in ${@:3}; do
     for file in *dimension-averaged-activity-map.csv; do
-      echo python templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
     done
   done | parallel -j 10
 elif [[ "${tranche_scoring_mode}" == "tranche_min_score" ]] ||  [[ "${tranche_scoring_mode}" == "tranche_ave_score" ]] ; then
   for size in ${@:3}; do
     for file in *clean.csv; do
-      echo python templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
     done
   done | parallel -j 10
 fi
