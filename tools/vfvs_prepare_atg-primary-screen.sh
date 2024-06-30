@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #Checking the input arguments
-usage="Usage: vfvs_prepare_atg-primaryscreen-screen.sh <jobname prefix> <tranche scoring method> <size 1> <size 2> ...
+usage="Usage: vfvs_prepare_atg-primary-screen.sh <jobname prefix> <tranche scoring method> <size 1> <size 2> ...
 
 Description: Preparing the folders for the ATG Primary Screens. For each docking scenario, and each specified screening size, one ATG Primary Screen folder will be created. The ATG Prescreen has to be postprocessed (with the command vfvs_postprocess_atg-prescreen.sh) before running this command with the same screening sizes. 
 
@@ -30,8 +30,8 @@ if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
       for a in {A..F}; do
         echo -n "${i},${a}," ;  grep -E "^.{$i}$a" $file | awk -F ',' '{ total += $NF; count++ } END { print total/count }' || echo
       done
-    done | sed "1i\Tranche,Class,Score" | tee ${file//.*}.dimension-averaged-activity-map.csv
-  & done
+    done | sed "1i\Tranche,Class,Score" | tee ${file//.*}.dimension-averaged-activity-map.csv &
+  done
 fi
 wait
 

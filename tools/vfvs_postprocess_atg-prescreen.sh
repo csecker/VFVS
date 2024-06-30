@@ -1,12 +1,10 @@
 #!/bin/sh
 
 #Checking the input arguments
-usage="Usage: vfvs_postprocess_atg-prescreen.sh <size 1> <size 2> ...
+usage="Usage: vfvs_postprocess_atg-prescreen.sh
 
 Description: Postprocessing the ATG Prescreen, and preparing the todo files for the ATG Primary Screens. The script can handle multiple docking scenarios in the ATG Prescreen.
 
-Arguments:
-    <size N>: Number of ligands that should be screened in the ATG Primary Screen. Multiple sizes can be spcified if multiple ATG Primary Screens are planned to be run with different screening sizes. N is typically set to 10000000 (10M) or 100000000 (100M)
 "
 
 if [ "${1}" == "-h" ]; then
