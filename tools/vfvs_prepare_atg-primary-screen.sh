@@ -1,12 +1,13 @@
 #!/bin/sh
 
 #Checking the input arguments
-usage="Usage: vfvs_prepare_atg-primaryscreen-screen.sh <jobname prefix> <size 1> <size 2> ...
+usage="Usage: vfvs_prepare_atg-primaryscreen-screen.sh <jobname prefix> <tranche scoring method> <size 1> <size 2> ...
 
 Description: Preparing the folders for the ATG Primary Screens. For each docking scenario, and each specified screening size, one ATG Primary Screen folder will be created. The ATG Prescreen has to be postprocessed (with the command vfvs_postprocess_atg-prescreen.sh) before running this command with the same screening sizes. 
 
 Arguments:
     <jobname prefix>: String that is used as prefix in the job output folders, e.g. abl1-vs1
+    <tranche_scoring_mode: dimension_averaging, tranche_min_score or tranche_ave_score
     <size N>: Number of ligands that should be screened in the ATG Primary Screen. Multiple sizes can be spcified if multiple ATG Primary Screens are planned to be run with different screening sizes. N is typically set to 10000000 (10M) or 100000000 (100M)
 "
 
@@ -21,6 +22,35 @@ if [ "$#" -le "1" ]; then
    exit 1
 fi
 
+# Getting the score averages for each tranche
+tranche_scoring_mode=$2
+if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
+  for file in *clean.csv; do
+    for i in {0..17}; do
+      for a in {A..F}; do
+        echo -n "${i},${a}," ;  grep -E "^.{$i}$a" $file | awk -F ',' '{ total += $NF; count++ } END { print total/count }' || echo
+      done
+    done | sed "1i\Tranche,Class,Score" | tee ${file//.*}.dimension-averaged-activity-map.csv
+  & done
+fi
+wait
+
+# Generating new todo files for the ATG Primary Screens
+# requires conda
+if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
+  for size in ${@:3}; do
+    for file in *dimension-averaged-activity-map.csv; do
+      echo python templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+    done
+  done | parallel -j 10
+elif [[ "${tranche_scoring_mode}" == "tranche_min_score" ]] ||  [[ "${tranche_scoring_mode}" == "tranche_ave_score" ]] ; then
+  for size in ${@:3}; do
+    for file in *clean.csv; do
+      echo python templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+    done
+  done | parallel -j 10
+fi
+wait
 
 # Prepare next stage foldersparent_dir=$(basename $(dirname $(pwd)))
 prefix=$1

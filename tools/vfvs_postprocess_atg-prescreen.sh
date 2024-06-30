@@ -25,22 +25,13 @@ mkdir -p ../output-files
 cd ../output-files
 
 # Getting the CSV files with the ligand rankings
-for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do ../tools/vfvs_get_top_results.py --scenario-name $ds --download ; done
+for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
+  ../tools/vfvs_get_top_results.py --scenario-name $ds --download
+done
 
 # Cleaning the CSV files
-for file in *csv; do awk -F ',' '{print $2,$1,$5}' $file | tr -d '"' > ${file/csv/clean.txt} & done
+for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' > ${ds}.clean.csv ; done
 
 wait 
-
-# Getting the score averages for each tranche
-for file in *clean.txt; do for i in {0..17}; do for a in {A..F}; do echo -n "${i},${a}," ;  grep -E "^.{$i}$a" $file | awk '{ total += $NF; count++ } END { print total/count }' || echo; done; done | sed "1i\Tranche,Class,Score" | tee ${file//.*}.sparse-metrics & done
-
-wait
-
-# Generating new todo files for the ATG Primary Screens
-# requires conda
-for size in $@; do for file in *sparse-metrics; do echo python ../tools/templates/create_activitymap.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${file/.*}.all.todo.$size $size ; done ; done | parallel -j 10
-
-wait
 
 cd ../tools
