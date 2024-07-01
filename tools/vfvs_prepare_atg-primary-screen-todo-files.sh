@@ -30,7 +30,7 @@ echo "Tranche scoring mode: ${tranche_scoring_mode}"
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   inputfile=${ds}.ranking.subset-1.csv.gz
-  echo "echo Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
+  echo "Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
     for i in {0..17}; do
       for a in {A..F}; do
         echo -n "${i},${a},"
@@ -46,14 +46,14 @@ wait
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for size in ${@:2}; do
     for file in *dimension-averaged-activity-map.csv; do
-      echo "Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
+      echo "echo Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
       echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.collections.parquet ~/Enamine_REAL_Space_2022q12.tranches.parquet ${tranche_scoring_mode} ${file/.*}.todo.$size $size
     done
   done | parallel -j 10
 elif [[ "${tranche_scoring_mode}" == "tranche_min_score" ]] ||  [[ "${tranche_scoring_mode}" == "tranche_ave_score" ]] ; then
   for size in ${@:2}; do
     for file in *ranking.subset-1.csv.gz; do
-      echo "Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
+      echo "echo Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
       echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.collections.parquet ~/Enamine_REAL_Space_2022q12.tranches.parquet ${tranche_scoring_mode} ${file/.*}.todo.$size $size
     done
   done | parallel -j 10
