@@ -28,7 +28,7 @@ echo "Tranche scoring mode: ${tranche_scoring_mode}"
 
 # Getting the score averages for each tranche
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
-  for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " ")
+  for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   inputfile=${ds}.ranking.subset-1.csv.gz
   echo "Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
     for i in {0..17}; do
