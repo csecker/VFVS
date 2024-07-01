@@ -27,16 +27,20 @@ cd ../output-files
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   echo "Generating the ranking of docking scenario ${ds} and downloading it to ../output-files/${ds}.ranking.complete.csv ..."
   ../tools/vfvs_get_top_results.py --scenario-name $ds --download
-  echo "Compression ../output-files/${ds}.ranking.complete.csv (new filename ../output-files/${ds}.ranking.complete.csv.gz) ..."
-  cat ${ds}.ranking.complete.csv | tr -d '"' | pigz -c > ${ds}.ranking.complete.csv.gz
-  rm ${ds}.ranking.complete.csv
 done
 
 # Creating subset of the CSV files
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  echo "Creating a subset of the ranking file with fewer columns ..."
-  awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' | pigz -c > ${ds}.subset-1.csv.gz
+  echo "Creating a subset of the ranking file with fewer columns and storing it in ../output-files/${ds}.subset-1.csv.gz ..."
+  awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.ranking.complete.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' | pigz -c > ${ds}.subset-1.csv.gz
   rm ${ds}.subset-1.csv
+done
+
+# Compressing the complete ranking files
+for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
+  echo "Compressing the file ../output-files/${ds}.ranking.complete.csv into ../output-files/${ds}.ranking.complete.csv.gz ..."
+  cat ${ds}.ranking.complete.csv | tr -d '"' | pigz -c > ${ds}.ranking.complete.csv.gz
+  rm ${ds}.ranking.complete.csv
 done
 
 wait 
