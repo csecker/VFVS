@@ -221,8 +221,8 @@ def unpack_item(item):
         return None
 
     # Check if we have specific instructions
-    if(item['collection']['mode'] == "sensor_screen_mode"):
-        sensor_screen_ligands = {}
+    if(item['collection']['mode'] == "prescreen_mode"):
+        prescreen_ligands = {}
 
         # We should read the sparse file to know which ligands we actually need to keep
         with open(os.path.join(item['temp_dir'], item['collection']['collection_number'], ".listing"), "r") as read_file:
@@ -231,13 +231,13 @@ def unpack_item(item):
 
                 screen_collection_key, screen_ligand_name, screen_index = line.split(",")
 
-                if(int(screen_index) >= item['collection']['sensor_screen_count']):
+                if(int(screen_index) >= item['collection']['prescreen_ligands_per_tranche']):
                     continue
 
-                sensor_screen_ligands[screen_ligand_name] = ligands[screen_ligand_name]
-                sensor_screen_ligands[screen_ligand_name]['collection_key'] = screen_collection_key
+                prescreen_ligands[screen_ligand_name] = ligands[screen_ligand_name]
+                prescreen_ligands[screen_ligand_name]['collection_key'] = screen_collection_key
 
-        return sensor_screen_ligands
+        return prescreen_ligands
     elif(item['collection']['mode'] == "named"):
         select_ligands = {}
         for ligand_name in item['collection']['ligands']:

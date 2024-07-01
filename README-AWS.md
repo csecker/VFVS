@@ -233,7 +233,7 @@ Downloading result files
 AWS Batch Progress
 -----------------------------------------------------------------
 
-Docking count is inaccurate for sensor screens. Correct value will
+Docking count is inaccurate for prescreens. Correct value will
 be in 'Completed Summary' when finished.
 
          Status   Workunits        Subjobs      Dockings (est.)
@@ -274,7 +274,7 @@ Downloading result files
 AWS Batch Progress
 -----------------------------------------------------------------
 
-Docking count is inaccurate for sensor screens. Correct value will
+Docking count is inaccurate for prescreens. Correct value will
 be in 'Completed Summary' when finished.
 
          Status   Workunits        Subjobs      Dockings (est.)

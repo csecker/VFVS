@@ -304,23 +304,23 @@ docking_scenario_basefolder=../input-files
 # Base directory for where the docking scenarios are held. Nothing other 
 # than the required files for the docking scenario should be placed here
 
-sensor_screen_mode=1
+prescreen_mode=1
 # Run a subset of the ligands included in the library. Only functional
-# if library supports the sensor screen functionality with .listing
+# if library supports the prescreen functionality with .listing
 # file inside the collection
 #
 # This is also only supported when collection_list_type=standard
 #
 # Supported values:
 #   0 : Turned off, run all ligands within each collection
-#   1 : Turned on, run only `sensor_screen_count` number of ligands per
+#   1 : Turned on, run only `prescreen_ligands_per_tranche` number of ligands per
 #       individual collection
 
-sensor_screen_count=1
+prescreen_ligands_per_tranche=1
 # Number of ligands from a given collection/tranche that should
-# be screened from a sensor screen enabled collection (with .listing file)
+# be screened from a prescreen enabled collection (with .listing file)
 #
-# Only used if sensor_screen_mode=1
+# Only used if prescreen_mode=1
 
 run_atom_check=1
 # Remove ligands when certain atoms B, Si, Sn are found

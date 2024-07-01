@@ -417,7 +417,7 @@ def process(config):
     print(f"")
 
 
-    print(f"Docking count is inaccurate for sensor screens. Correct value will")
+    print(f"Docking count is inaccurate for prescreens. Correct value will")
     print(f"be in 'Completed Summary' when finished.")
     print(f"")
 
