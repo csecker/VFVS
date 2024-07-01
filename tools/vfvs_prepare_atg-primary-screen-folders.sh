@@ -82,7 +82,7 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
   done
 done
 
-
+# Changing to original directory
 cd ../tools
 
 #for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do for size in ${@:2}; do ( cd ../../atg-primaryscreen_${size}_${ds}/tools; ./vfvs_prepare_folders.py ) ;  done; done
