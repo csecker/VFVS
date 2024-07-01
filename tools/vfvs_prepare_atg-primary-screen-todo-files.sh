@@ -29,8 +29,8 @@ echo "Tranche scoring mode: ${tranche_scoring_mode}"
 # Getting the score averages for each tranche
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  inputfile=${ds}.ranking.subset-1.csv.gz
-  echo "Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
+    inputfile=${ds}.ranking.subset-1.csv.gz
+    echo "Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
     for i in {0..17}; do
       for a in {A..F}; do
         echo -n "${i},${a},"
@@ -56,7 +56,7 @@ elif [[ "${tranche_scoring_mode}" == "tranche_min_score" ]] ||  [[ "${tranche_sc
       echo "echo Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
       echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.collections.parquet ~/Enamine_REAL_Space_2022q12.tranches.parquet ${tranche_scoring_mode} ${file/.*}.todo.$size $size
     done
-  done | parallel -j 10
+  done | parallel -j 2 # depends on memory size mostly, each instance requires around 20GB of memory
 fi
 wait
 
