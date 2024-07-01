@@ -25,56 +25,56 @@ cd ../output-files
 
 # Prepare next stage foldersparent_dir=$(basename $(dirname $(pwd)))
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Creating new VF directory (../../atg-primaryscreen_${size}_${ds}) for the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands"
     mkdir ../../atg-primaryscreen_${size}_${ds}
     cp -r ../.git* ../input-files/ ../tools/ ../../atg-primaryscreen_${size}_${ds}
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting job_name to atg-primaryscreen_${size}_${ds}"
     sed -i "s/job_name=.*/job_name=atg-primaryscreen_${size}_${ds}/g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting data_collection_identifier to Enamine_REAL_Space_2022q12"
     sed -i "s|data_collection_identifier=.*|data_collection_identifier=Enamine_REAL_Space_2022q12|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting prescreen_mode to 0"
     sed -i "s|prescreen_mode=.*|prescreen_mode=0|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting docking_scenario_names to ${ds}"
     sed -i "s|docking_scenario_names=.*|docking_scenario_names=${ds}|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting docking_scenario_batchsizes to 1"
     sed -i "s|docking_scenario_batchsizes=.*|docking_scenario_batchsizes=1|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting docking_scenario_replicas to 1"
     sed -i "s|docking_scenario_replicas=.*|docking_scenario_replicas=1|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Edting the all.ctrl file of the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands: Setting docking_scenario_programs to qvina02"
     sed -i "s|docking_scenario_programs=.*|docking_scenario_programs=qvina02|g" ../../atg-primaryscreen_${size}_${ds}/tools/templates/all.ctrl
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  for size in ${@:2}; do
+  for size in ${@:1}; do
     echo "Copying the newly created todo file for docking scenario ${ds}: cp ../output-files/${ds}.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all"
     cp ../output-files/${ds}.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all
   done
