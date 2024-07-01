@@ -254,13 +254,9 @@ def main():
 
   if args_dict['download'] == True:
     if 'top' in args_dict and args_dict['top'] != None:
-      os.system(f"aws s3 cp {response['QueryExecution']['ResultConfiguration']['OutputLocation']}" + " " + "../output-files/" + scenario + "." + "top-" +  str(args.top) + ".csv")
+      os.system(f"aws s3 cp {response['QueryExecution']['ResultConfiguration']['OutputLocation']}" + " " + "../output-files/" + scenario + ".ranking." + "top-" +  str(args.top) + ".csv")
     else:
-      os.system(f"aws s3 cp {response['QueryExecution']['ResultConfiguration']['OutputLocation']}" + " " + "../output-files/" + scenario + ".csv")
-
-
-
-
+      os.system(f"aws s3 cp {response['QueryExecution']['ResultConfiguration']['OutputLocation']}" + " " + "../output-files/" + scenario + ".ranking.complete.csv")
 
 if __name__ == '__main__':
     main()

@@ -19,17 +19,24 @@ if [ "$#" -e "0" ]; then
 fi
 
 # Output-files directory
+echo "Creating output-files folder (if it does not yet exist) ..."
 mkdir -p ../output-files
 cd ../output-files
 
 # Getting the CSV files with the ligand rankings
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
+  echo "Generating the ranking of docking scenario ${ds} and downloading it to ../output-files/${ds}.ranking.complete.csv ..."
   ../tools/vfvs_get_top_results.py --scenario-name $ds --download
+  echo "Compression ../output-files/${ds}.ranking.complete.csv (new filename ../output-files/${ds}.ranking.complete.csv.gz) ..."
+  cat ${ds}.ranking.complete.csv | tr -d '"' | pigz -c > ${ds}.ranking.complete.csv.gz
+  rm ${ds}.ranking.complete.csv
 done
 
-# Cleaning the CSV files
+# Creating subset of the CSV files
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
-  awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' > ${ds}.clean.csv
+  echo "Creating a subset of the ranking file with fewer columns ..."
+  awk 'BEGIN { FS=OFS="," } { gsub("_", ",", $2); print }' ${ds}.csv | awk -F ',' '{print $2","$3","$1","$5}' | sed "1s/.*/Tranche,Collection,LigandVFID,ScoreMin/" | tr -d '"' | pigz -c > ${ds}.subset-1.csv.gz
+  rm ${ds}.subset-1.csv
 done
 
 wait 

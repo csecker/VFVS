@@ -2,12 +2,12 @@
 # coding: utf-8
 
 # Arguments
-# 1: Path to the dimension averaged tranche scores file (if tranche scoring mode == dimension_averaging) or path to the prescreening docking score output file (cleaned)
-# 2: Path to todo.all file of complete library
-# 3: Path to todo.count file of complete library
+# 1: Path to the dimension averaged tranche scores file (if tranche scoring mode == dimension_averaging) or path to the prescreening ranking subset-1 file
+# 2: Path to collections file of complete library in parquet format (Enamine_REAL_Space_2022q12.collections.parquet)
+# 3: Path to tranches file of complete library in parquet format (Enamine_REAL_Space_2022q12.tranches.parquet)
 # 4: Tranche scoring mode: dimension_averaging, tranche_min_score or tranche_ave_score
-# 5: Target number of ligands for primary screen
-# 6: Output filename of local todo-file that will be generated
+# 5: Output filename of local todo-file that will be generated
+# 6: Target number of ligands for primary screen
 
 # Imports and Settings
 import pandas as pd
@@ -17,10 +17,10 @@ import sys
 from IPython.display import display, HTML
 
 # Arguments
-print("Loading library collections file...")
-df_library_collections = pd.read_csv(sys.argv[2], dtype={'Collection': str})
+print("Loading library collections file ...")
+df_library_collections = pd.read_parquet(sys.argv[2])
 print("Loading library tranches file...")
-df_library_tranches = pd.read_csv(sys.argv[3])
+df_library_tranches = pd.read_parquet(sys.argv[3])
 tranche_scoring_mode = sys.argv[4]
 ligand_count_aim = int(os.fsencode(sys.argv[6]))
 
@@ -95,7 +95,7 @@ if tranche_scoring_mode == "dimension_averaging":
         print("Current number of ligands:     ", ligands_selected)
 
     # electing subset of the last added tranche to prevent overselection
-    print("Selecting subset of the last added tranche to prevent overselection")
+    print("Selecting subset of the last added tranche to prevent overselection ...")
 
     # Copying the relevant rows
     df_ERS_todo_previous = df_library_collections[df_library_collections.Tranche.str.contains(regex_previous)].copy()
@@ -129,7 +129,6 @@ if tranche_scoring_mode == "dimension_averaging":
     df_ERS_todo_previous[["Collection", "LigandCount"]].to_csv(sys.argv[5],index=False,header=False,sep=' ')
     df_ERS_todo_added[df_ERS_todo_added.Selected == "yes"][["Collection", "LigandCount"]].to_csv(sys.argv[5],index=False,mode='a',header=False,sep=' ')
 
-
 elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
 
     # Settings
@@ -137,11 +136,11 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     display(HTML("<style>.container { width:100% !important; }</style>"))
 
     # Loading the data from files
-    print("Loading prescreening docking score file...")
-    df_prescreen_scores = pd.read_csv(sys.argv[1],usecols=[0, 3])
+    print("Loading prescreening docking score file ...")
+    df_prescreen_scores = pd.read_csv(sys.argv[1], usecols=[1, 3], compression='gzip')
 
     # Calculating the scores for each tranche
-    print("Calculating scores for each tranche to obtain activity map...")
+    print("Calculating scores for each tranche to obtain activity map ...")
     tranche_score_mode = "min_score"
     if tranche_scoring_mode == "tranche_min_score":
         # Calculate minimum score for each Tranche in df_library_tranches
@@ -171,7 +170,7 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     df_library_collections.loc[:, 'Selected'] = False
 
     # Loop until we have enough ligands
-    print("Selecting ligand collections for ATG Primary Screen...")
+    print("Selecting ligand collections for ATG Primary Screen ...")
     print("")
     while ligands_selected < ligand_count_aim:
         # Selecting next ligand collection
@@ -199,9 +198,8 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     # filtered_df.loc[:, 'TrancheCollection'] = filtered_df.apply(lambda row: f"{row['Tranche']}_{row['Collection']}", axis=1)
 
     # Save to CSV
-    print("Saving new todo file...")
+    print("Saving new todo file ..." + sys.argv[5])
     filtered_df[['TrancheCollection', 'LigandCount']].to_csv(sys.argv[5], index=False, header=False, sep=' ')
-    print("Script completed.")
     print("")
 
 else:

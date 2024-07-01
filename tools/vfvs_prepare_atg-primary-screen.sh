@@ -22,18 +22,23 @@ if [ "$#" -le "1" ]; then
    exit 1
 fi
 
-# Getting the score averages for each tranche
+# Initial setup
 cd ../output-files
+prefix=$1
 tranche_scoring_mode=$2
-echo tranche_scoring_mode: ${tranche_scoring_mode}
+echo "Tranche scoring mode: ${tranche_scoring_mode}"
 
+# Getting the score averages for each tranche
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
-  for file in *clean.csv; do
+  for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " ")
+  inputfile=${ds}.ranking.subset-1.csv.gz
+  echo "Generating the dimension averaged tranche scores for docking scenario ${ds} and stored it in ../output-files/${ds}.dimension-averaged-activity-map.csv ..."
     for i in {0..17}; do
       for a in {A..F}; do
-        echo -n "${i},${a}," ;  grep -E "^.{$i}$a" $file | awk -F ',' '{ total += $NF; count++ } END { print total/count }' || echo
+        echo -n "${i},${a},"
+        zgrep -E "^.{$i}$a" ${inputfile} | awk -F ',' '{ total += $NF; count++ } END { print total/count }' || echo
       done
-    done | sed "1i\Tranche,Class,Score" | tee ${file//.*}.dimension-averaged-activity-map.csv &
+    done | sed "1i\Tranche,Class,Score" | tee ${ds}.dimension-averaged-activity-map.csv &
   done
 fi
 wait
@@ -43,20 +48,21 @@ wait
 if [ "${tranche_scoring_mode}" == "dimension_averaging" ]; then
   for size in ${@:3}; do
     for file in *dimension-averaged-activity-map.csv; do
-      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+      echo "Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
+      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.collections.parquet ~/Enamine_REAL_Space_2022q12.tranches.parquet ${tranche_scoring_mode} ${file/.*}.todo.$size $size
     done
   done | parallel -j 10
 elif [[ "${tranche_scoring_mode}" == "tranche_min_score" ]] ||  [[ "${tranche_scoring_mode}" == "tranche_ave_score" ]] ; then
   for size in ${@:3}; do
-    for file in *clean.csv; do
-      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.todo.csv ~/Enamine_REAL_Space_2022q12.count.csv ${tranche_scoring_mode} ${file/.*}.all.todo.$size $size
+    for file in *ranking.subset-1.csv.gz; do
+      echo "Generating the todo file for the ATG Primary Screens for docking scenario ${file//.*} with ${size} ligands and storing it in ../output-files/${file/.*}.todo.$size ..."
+      echo python ../tools/templates/create_todofile_atg-primaryscreen.py $file ~/Enamine_REAL_Space_2022q12.collections.parquet ~/Enamine_REAL_Space_2022q12.tranches.parquet ${tranche_scoring_mode} ${file/.*}.todo.$size $size
     done
   done | parallel -j 10
 fi
 wait
 
 # Prepare next stage foldersparent_dir=$(basename $(dirname $(pwd)))
-prefix=$1
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   for size in ${@:3}; do
     echo "Creating new VF directory (../../atg-primaryscreen_${size}_${ds}) for the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands"
@@ -108,8 +114,8 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   for size in ${@:3}; do
-    echo "Copying the newly created todo file for docking scenario ${ds}: cp ../output-files/${ds}.all.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all"
-    cp ../output-files/${ds}.all.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all
+    echo "Copying the newly created todo file for docking scenario ${ds}: cp ../output-files/${ds}.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all"
+    cp ../output-files/${ds}.todo.${size} ../../atg-primaryscreen_${size}_${ds}/tools/templates/todo.all
   done
 done
 
