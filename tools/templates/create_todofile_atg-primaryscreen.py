@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # Arguments
-# 1: Path to the dimension averaged tranche scores file (if tranche scoring mode == dimension_averaging) or path to the prescreening ranking subset-1 file
+# 1: Path to the dimension averaged tranche scores file (if tranche scoring mode == dimension_averaging) or path to the prescreening ranking subset-1 file (if tranche_scoring_mode is tranche_min_score or tranche_ave_score)
 # 2: Path to collections file of complete library in parquet format (Enamine_REAL_Space_2022q12.collections.parquet)
 # 3: Path to tranches file of complete library in parquet format (Enamine_REAL_Space_2022q12.tranches.parquet)
 # 4: Tranche scoring mode: dimension_averaging, tranche_min_score or tranche_ave_score
@@ -137,7 +137,7 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
 
     # Loading the data from files
     print("Loading prescreening docking score file ...")
-    df_prescreen_scores = pd.read_csv(sys.argv[1], usecols=[1, 3], compression='gzip')
+    df_prescreen_scores = pd.read_csv(sys.argv[1], usecols=[0, 3], compression='gzip')
 
     # Calculating the scores for each tranche
     print("Calculating scores for each tranche to obtain activity map ...")
