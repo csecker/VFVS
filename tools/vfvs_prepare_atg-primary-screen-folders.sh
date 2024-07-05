@@ -22,13 +22,17 @@ fi
 
 # Initial setup
 cd ../output-files
+echo
 
 # Prepare next stage foldersparent_dir=$(basename $(dirname $(pwd)))
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
   for size in ${@:1}; do
     echo "Creating new VF directory (../../atg-primaryscreen_${size}_${ds}) for the ATG Primary Screen of docking scenrio ${ds} for ${size} ligands"
-    mkdir ../../atg-primaryscreen_${size}_${ds}
-    cp -r ../.git* ../input-files/ ../tools/ ../../atg-primaryscreen_${size}_${ds}
+    mkdir ../../atg-primaryscreen_${size}_${ds}/
+    mkdir ../../atg-primaryscreen_${size}_${ds}/input-files/
+    cp -r ../.git* ../tools/ ../../atg-primaryscreen_${size}_${ds}/
+    cp -r ../input-files/receptors/ ../../atg-primaryscreen_${size}_${ds}/input-files/
+    cp -r ../input-files/${ds}/ ../../atg-primaryscreen_${size}_${ds}/input-files/
   done
 done
 for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do
@@ -81,6 +85,7 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
 done
 
 # Changing to original directory
+echo
 cd ../tools
 
 #for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr "," " " | tr -d '"\n[]' | tr -s " "); do for size in ${@:2}; do ( cd ../../atg-primaryscreen_${size}_${ds}/tools; ./vfvs_prepare_folders.py ) ;  done; done

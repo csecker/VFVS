@@ -315,7 +315,39 @@ def collection_process(ctx, collection_queue, docking_queue, summary_queue):
                             break
                         coords[coord_str] = 1
 
+                    # Checking for dynamic tranche filtering
+                    if (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
+
+                        # Checking if the line contains the tranche
+                        match = re.search(r'^Tranche:', line)
+                        if (match):
+                            # Obtaining the tranche
+                            parts = line.split()
+                            tranche  = parts[2:3]
+
+                            # Compiling the user's regex
+                            try:
+                                compiled_regex = re.compile(ctx['main_config']['dynamic_tranche_filtering_regex'])
+                            except re.error as e:
+                                print(f"Invalid regular expression: {e}")
+                                return None
+
+                            # Search for the pattern in the test string
+                            match = compiled_regex.search(tranche)
+
+                            # Checking if the tranche is not part of the regex
+                            if not match:
+                                print(" Skipping ligand due to dynamic tranche filtering.")
+                                logging.error(
+                                    f"Ligand {ligand} not contained in part of the library specified by regular expression. Skipping.")
+                                skip_reason = f"failed(dynamic_tranche_filtering)"
+                                skip_reason_json = f"dynamic tranche filtering"
+                                skip_ligand = 1
+                                break
+
+
             if(skip_ligand == 0):
+
                 # We can submit this for processing
                 ligand_attrs = get_attrs(ctx['main_config']['ligand_library_format'], ligand['path'], ctx['main_config']['print_attrs_in_summary'])
                 submit_ligand_for_docking(ctx, docking_queue, ligand_key, ligand['path'], ligand['collection_key'], ligand['base_collection_key'], ligand_attrs, item['temp_dir'])
@@ -4150,9 +4182,27 @@ def process(ctx):
         for collection_key in subjob['collections']:
             collection = subjob['collections'][collection_key]
 
-            collection_name, collection_number = collection_key.split("_", maxsplit=1)
-            collection['collection_number'] = collection_number
-            collection['collection_name'] = collection_name
+            # Checking if dynamic tranche filtering is enabled
+            if (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
+
+                # Compiling the user's regex
+                try:
+                    compiled_regex = re.compile(ctx['main_config']['dynamic_tranche_filtering_regex'])
+                except re.error as e:
+                    print(f"Invalid regular expression: {e}")
+                    return None
+
+                collection_name, collection_number = collection_key.split("_", maxsplit=1)
+                collection['collection_number'] = collection_number
+                collection['collection_name'] = collection_name
+
+                match = re.search(compiled_regex,collection_name)
+
+                if not match:
+                    print(" Skipping collection {collection_name} due to dynamic tranche filtering.")
+                    logging.error(
+                        f"Tranche {collection_name} not contained in part of the library specified by regular expression. Skipping.")
+                    break
 
             download_item = {
                 'collection_key': collection_key,
