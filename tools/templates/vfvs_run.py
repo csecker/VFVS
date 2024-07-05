@@ -319,11 +319,11 @@ def collection_process(ctx, collection_queue, docking_queue, summary_queue):
                     if (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
 
                         # Checking if the line contains the tranche
-                        match = re.search(r'^Tranche:', line)
+                        match = re.search('Tranche:', line)
                         if (match):
                             # Obtaining the tranche
                             parts = line.split()
-                            tranche  = parts[2:3]
+                            tranche  = parts[2].strip()
 
                             # Compiling the user's regex
                             try:
