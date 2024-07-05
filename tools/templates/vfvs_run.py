@@ -337,9 +337,8 @@ def collection_process(ctx, collection_queue, docking_queue, summary_queue):
 
                             # Checking if the tranche is not part of the regex
                             if not match:
-                                print(" Skipping ligand due to dynamic tranche filtering.")
-                                logging.error(
-                                    f"Ligand {ligand} not contained in part of the library specified by regular expression. Skipping.")
+                                print(f" Skipping ligand {ligand} due to dynamic tranche filtering. Tranche of ligand: {tranche}, regex:{ctx['main_config']['dynamic_tranche_filtering_regex']}")
+                                #logging.error(f"Ligand {ligand} not contained in part of the library specified by regular expression. Skipping.")
                                 skip_reason = f"failed(dynamic_tranche_filtering)"
                                 skip_reason_json = f"dynamic tranche filtering"
                                 skip_ligand = 1
@@ -4181,6 +4180,9 @@ def process(ctx):
 
         for collection_key in subjob['collections']:
             collection = subjob['collections'][collection_key]
+            collection_name, collection_number = collection_key.split("_", maxsplit=1)
+            collection['collection_number'] = collection_number
+            collection['collection_name'] = collection_name
 
             # Checking if dynamic tranche filtering is enabled and prescreen_mode is disabled (since the collections names in the prescreen mode do not have tranche names with properties encoded)
             if (int(ctx['main_config']['prescreen_mode']) == 0) and (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
@@ -4192,16 +4194,11 @@ def process(ctx):
                     print(f"Invalid regular expression: {e}")
                     return None
 
-                collection_name, collection_number = collection_key.split("_", maxsplit=1)
-                collection['collection_number'] = collection_number
-                collection['collection_name'] = collection_name
-
-                match = re.search(compiled_regex,collection_name)
+                match = re.search(compiled_regex, collection_name)
 
                 if not match:
-                    print(" Skipping collection {collection_name} due to dynamic tranche filtering.")
-                    logging.error(
-                        f"Tranche {collection_name} not contained in part of the library specified by regular expression. Skipping.")
+                    print(f" Skipping collection {collection_name} due to dynamic tranche filtering. Tranche of collection: {collection_name}, regex:{ctx['main_config']['dynamic_tranche_filtering_regex']}")
+                    #logging.error(f"Tranche {collection_name} not contained in part of the library specified by regular expression. Skipping.")
                     break
 
             download_item = {
