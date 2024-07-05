@@ -245,14 +245,13 @@ ligand_library_format=pdbqt
 # For the selected docking program, the user is required to set
 #     this to a compatible value. Eg: for plants, set this to mol2
 
-
 dynamic_tranche_filtering=1
 # Supported values:
 # * 0: Disabled
 # * 1: Enabled
 # If enabled, dynamic_library_filtering_regex has to be set to specify what parts of the library should be screened.
 
-dynamic_tranche_filtering_regex=^[A-F].*
+dynamic_tranche_filtering_regex=[A-F].................
 # Regular expressions in any format supported by the "re" module of python
 # The regular expression is used to check if for any ligand in the library that is screened, the tranche ID (a string with 18 capital letters) matches the regex, and if yes the ligand is docked, otherwise the ligand is skipped.
 

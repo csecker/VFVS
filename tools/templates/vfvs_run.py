@@ -4182,8 +4182,8 @@ def process(ctx):
         for collection_key in subjob['collections']:
             collection = subjob['collections'][collection_key]
 
-            # Checking if dynamic tranche filtering is enabled
-            if (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
+            # Checking if dynamic tranche filtering is enabled and prescreen_mode is disabled (since the collections names in the prescreen mode do not have tranche names with properties encoded)
+            if (int(ctx['main_config']['prescreen_mode']) == 0) and (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
 
                 # Compiling the user's regex
                 try:
