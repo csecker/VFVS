@@ -1030,7 +1030,7 @@ def process_config(ctx):
     ctx['main_config']['docking_scenarios'] = {}
 
     for index, scenario in enumerate(ctx['main_config']['docking_scenario_names']):
-        program_long = ctx['main_config']['docking_scenario_programs'][index]
+        program_long = ctx['main_config']['docking_scenario_methods'][index]
         program = program_long
 
         # Special handing for smina* and gwovina*

@@ -51,7 +51,7 @@ def parse_config(filename):
 
     config['docking_scenario_names'] = config['docking_scenario_names'].split(
         ":")
-    config['docking_scenario_programs'] = config['docking_scenario_programs'].split(
+    config['docking_scenario_methods'] = config['docking_scenario_methods'].split(
         ":")
     config['docking_scenario_replicas'] = config['docking_scenario_replicas'].split(
         ":")
