@@ -69,7 +69,7 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
       cp -r ../input-files/receptors/ ${new_vf_root_folder}/input-files/
       cp -r ../input-files/${ds}/ ${new_vf_root_folder}/input-files/
       echo "Copying the newly created todo file for docking scenario ${ds}: cp ../output-files/${ds}.todo.${screening_size} ${new_vf_root_folder}/tools/templates/todo.all"
-      cp ../output-files/${ds}.todo.${screening_size} ../../atg-primaryscreen_${screening_size}_${ds}/tools/templates/todo.all
+      cp ../output-files/${ds}.todo.${screening_size} ${new_vf_root_folder}/tools/templates/todo.all
       echo "Setting job_name in the all.ctrl file to atg-primaryscreen_${ds}_${screening_size}_repl${replica_count}"
       sed -i "s/job_name=.*/job_name=atg-primaryscreen_${ds}_${screening_size}_repl${replica_count}/g" ${new_vf_root_folder}/tools/templates/all.ctrl
       echo "Setting data_collection_identifier in the all.ctrl file to Enamine_REAL_Space_2022q12"
