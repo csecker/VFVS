@@ -270,7 +270,7 @@ docking_scenario_names=
 # Example: docking_scenario_names=
 # The docking scenario names are used for the folder names in which the output files are stored.
 # For each docking scenario name there has to be a folder inside the 'docking_scenario_basefolder'.
-# In each of these folders must be the file config.txt which is used by the docking method to specify its options
+# In each of thes e folders must be the file config.txt which is used by the docking method to specify its options
 # If other input files are required by the docking type, usually specified in the config.txt file, they have to be in the same folder.
 
 docking_scenario_methods=

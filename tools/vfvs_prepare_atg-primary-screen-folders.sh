@@ -84,6 +84,7 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
       sed -i "s|docking_scenario_replicas=.*|docking_scenario_replicas=${replica_count}|g" ${new_vf_root_folder}/tools/templates/all.ctrl
       echo "Setting docking_scenario_methods in the all.ctrl file to ${docking_scenario_method}"
       sed -i "s|docking_scenario_methods=.*|docking_scenario_methods=${docking_scenario_method}|g" ${new_vf_root_folder}/tools/templates/all.ctrl
+      echo
     done
   done
 done
