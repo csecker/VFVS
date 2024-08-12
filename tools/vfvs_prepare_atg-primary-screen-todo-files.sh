@@ -3,7 +3,7 @@
 #Checking the input arguments
 usage="Usage: vfvs_prepare_atg-primary-screen-todo-files.sh <tranche scoring method> <size 1> <size 2> ...
 
-Description: Preparing the folders for the ATG Primary Screens. For each docking scenario, and each specified screening size, one ATG Primary Screen folder will be created. The ATG Prescreen has to be postprocessed (with the command vfvs_postprocess_atg-prescreen.sh) before running this command with the same screening sizes. 
+Description: Preparing the folders for the ATG Primary Screens. For each docking scenario, and each specified screening size, one ATG Primary Screen folder will be created. The ATG Prescreen has to be postprocessed (with the command vfvs_postprocess_atg-prescreen.sh) before running this command with the same screening sizes. The command will take a large amount of memory. It is not recommended to run the command multiple times in parallel therefore on the same machine (unless you are sure you have enough memory).
 
 Arguments:
     <tranche_scoring_mode: dimension_averaging, tranche_min_score or tranche_ave_score
