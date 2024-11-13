@@ -192,7 +192,10 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
             print(df_library_collections.iloc[i])
             
             # Calculating the number of ligands selected
-            ligands_selected = df_library_collections.iloc[0:i]["LigandCount"].sum()
+            ligands_selected_old = df_library_collections.iloc[0:i]["LigandCount"].sum()
+            ligands_selected = df_library_collections.loc[df_library_collections["Selected"] == True, "LigandCount"].sum()
+            print("Ligands selected old: ", ligands_selected_old)
+            print("Ligands selected: ", ligands_selected)
             
             # Printing status
             print("Total number of ligands selected: ", ligands_selected)
