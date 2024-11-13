@@ -15,6 +15,8 @@ import copy
 import os
 import sys
 from IPython.display import display, HTML
+import re
+
 
 # Arguments
 print("Loading library collections file ...")
@@ -23,6 +25,7 @@ print("Loading library tranches file...")
 df_library_tranches = pd.read_parquet(sys.argv[3])
 tranche_scoring_mode = sys.argv[4]
 ligand_count_aim = int(os.fsencode(sys.argv[6]))
+tranche_filter_regex = sys.argv[7]
 
 if tranche_scoring_mode == "dimension_averaging":
 
@@ -173,18 +176,27 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     print("Selecting ligand collections for ATG Primary Screen ...")
     print("")
     while ligands_selected < ligand_count_aim:
-        # Selecting next ligand collection
-        df_library_collections.iloc[i, df_library_collections.columns.get_loc('Selected')] = True
-        print("Ligand collection selected:")
-        print(df_library_collections.iloc[i])
-
-        # Calculating the number of ligands selected
-        ligands_selected = df_library_collections.iloc[0:i + 1]["LigandCount"].sum()
-
-        # Printing status
-        print("Total number of ligands selected: ", ligands_selected)
-        print("")
-
+        
+        # Checking if next ligand collection matches regex
+        
+        if re.fullmatch(tranche_filter_regex, df_library_collections.iloc[i]):
+            print("The tranche matches the tranche_filter_regex. Including tranche...")
+            
+            # Selecting next ligand collection
+            df_library_collections.iloc[i, df_library_collections.columns.get_loc('Selected')] = True
+            print("Ligand collection selected:")
+            print(df_library_collections.iloc[i])
+            
+            # Calculating the number of ligands selected
+            ligands_selected = df_library_collections.iloc[0:i + 1]["LigandCount"].sum()
+            
+            # Printing status
+            print("Total number of ligands selected: ", ligands_selected)
+            print("")
+            
+        else:
+            print("The tranche does not match the tranche_filter_regex. Skipping tranche...")
+        
         # Index
         i = i + 1
 

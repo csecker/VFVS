@@ -76,6 +76,8 @@ for ds in $(cat ../workflow/config.json  | jq -r ".docking_scenario_names" | tr 
       sed -i "s|data_collection_identifier=.*|data_collection_identifier=Enamine_REAL_Space_2022q12|g" ${new_vf_root_folder}/tools/templates/all.ctrl
       echo "Setting prescreen_mode in the all.ctrl file to 0"
       sed -i "s|prescreen_mode=.*|prescreen_mode=0|g" ${new_vf_root_folder}/tools/templates/all.ctrl
+      echo "Setting dynamic_tranche_filtering in the all.ctrl file to 0"
+      sed -i "s|dynamic_tranche_filtering=.*|dynamic_tranche_filtering=0|g" ${new_vf_root_folder}/tools/templates/all.ctrl
       echo "Setting docking_scenario_names in the all.ctrl file to ${ds}"
       sed -i "s|docking_scenario_names=.*|docking_scenario_names=${ds}|g" ${new_vf_root_folder}/tools/templates/all.ctrl
       echo "Setting docking_scenario_batchsizes in the all.ctrl file to 1"
