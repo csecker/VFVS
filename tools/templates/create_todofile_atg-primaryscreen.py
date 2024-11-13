@@ -178,8 +178,11 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
     while ligands_selected < ligand_count_aim:
         
         # Checking if next ligand collection matches regex
-        print("tranche_filter_regex: ", tranche_filter_regex, "df_library_collections: ", df_library_collections.iloc[i].Tranche)
-        
+        print("")
+        print("Considering next ligand collection")
+        print("tranche_filter_regex: ", tranche_filter_regex)
+        print("Current ligand collection: ", df_library_collections.iloc[i].Tranche)
+        print("Checking regex match...")
         if re.fullmatch(tranche_filter_regex, df_library_collections.iloc[i].Tranche):
             print("The tranche matches the tranche_filter_regex. Including tranche...")
             
@@ -197,6 +200,7 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
             
         else:
             print("The tranche does not match the tranche_filter_regex. Skipping tranche...")
+            print("")
         
         # Index
         i = i + 1
