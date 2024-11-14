@@ -59,44 +59,92 @@ if tranche_scoring_mode == "dimension_averaging":
     # Adding additional tranche classes
 
     # Loop until we have enough ligands
+    # while ligands_selected < ligand_count_aim:
+    #
+    #     # Finding the minimum difference tranche class
+    #     selected_class = df_tranche_scores[df_tranche_scores.Diff == df_tranche_scores.Diff.min()].head(1)
+    #     #selected_class = df_tranche_scores[df_tranche_scores.Score == df_tranche_scores.Score.min()].head(1)
+    #
+    #     # Dropping the selected tranche class
+    #     df_tranche_scores = df_tranche_scores.drop(selected_class.index)
+    #
+    #     # Re-indexing
+    #     selected_class = selected_class.reset_index(drop=True)
+    #     df_tranche_scores = df_tranche_scores.reset_index(drop=True)
+    #
+    #     # Adding the new tranche class to regex of selected tranches
+    #     added_classes = copy.deepcopy(selected_classes)
+    #     selected_classes[selected_class.at[0,'Tranche']] = selected_classes[selected_class.at[0,'Tranche']] + selected_class.at[0,'Class']
+    #     added_classes[selected_class.at[0,'Tranche']] = selected_class.at[0,'Class']
+    #
+    #     # Reforming regex strings
+    #     regex_previous = copy.deepcopy(regex)
+    #     regex_added = ''
+    #     regex = ''
+    #     for Tranche in range(0, 18):
+    #         regex = regex + '[' + selected_classes[Tranche] + ']'
+    #     for Tranche in range(0, 18):
+    #         regex_added = regex_added + '[' + added_classes[Tranche] + ']'
+    #
+    #     # Calculating the number of ligands selected
+    #     ligands_selected_previous = ligands_selected
+    #     ligands_selected = df_library_tranches[df_library_tranches.Tranche.str.contains(regex)]['LigandCount'].sum()
+    #
+    #     # Printing status
+    #     print("")
+    #     print("Previous tranche regex string: ", regex_previous)
+    #     print("Added tranche regex string:    ", regex_added)
+    #     print("Current tranche regex string:  ", regex)
+    #     print("Current number of ligands:     ", ligands_selected)
+    # Loop until we have enough ligands
     while ligands_selected < ligand_count_aim:
-
+        
         # Finding the minimum difference tranche class
         selected_class = df_tranche_scores[df_tranche_scores.Diff == df_tranche_scores.Diff.min()].head(1)
-        #selected_class = df_tranche_scores[df_tranche_scores.Score == df_tranche_scores.Score.min()].head(1)
-
-        # Dropping the selected tranche class
-        df_tranche_scores = df_tranche_scores.drop(selected_class.index)
-
-        # Re-indexing
+        
+        # Resetting indices for easy access
         selected_class = selected_class.reset_index(drop=True)
         df_tranche_scores = df_tranche_scores.reset_index(drop=True)
-
-        # Adding the new tranche class to regex of selected tranches
-        added_classes = copy.deepcopy(selected_classes)
-        selected_classes[selected_class.at[0,'Tranche']] = selected_classes[selected_class.at[0,'Tranche']] + selected_class.at[0,'Class']
-        added_classes[selected_class.at[0,'Tranche']] = selected_class.at[0,'Class']
-
-        # Reforming regex strings
-        regex_previous = copy.deepcopy(regex)
-        regex_added = ''
-        regex = ''
-        for Tranche in range(0, 18):
-            regex = regex + '[' + selected_classes[Tranche] + ']'
-        for Tranche in range(0, 18):
-            regex_added = regex_added + '[' + added_classes[Tranche] + ']'
-
-        # Calculating the number of ligands selected
-        ligands_selected_previous = ligands_selected
-        ligands_selected = df_library_tranches[df_library_tranches.Tranche.str.contains(regex)]['LigandCount'].sum()
-
-        # Printing status
-        print("")
-        print("Previous tranche regex string: ", regex_previous)
-        print("Added tranche regex string:    ", regex_added)
-        print("Current tranche regex string:  ", regex)
-        print("Current number of ligands:     ", ligands_selected)
-
+        
+        # Get the tranche value for regex matching
+        tranche_to_add = selected_class.at[0, 'Tranche']
+        
+        # Checking regex match with tranche_filter_regex
+        if re.fullmatch(tranche_filter_regex, str(tranche_to_add)):
+            print(f"Tranche {tranche_to_add} matches the tranche_filter_regex. Including tranche...")
+            
+            # Dropping the selected tranche class
+            df_tranche_scores = df_tranche_scores.drop(selected_class.index)
+            
+            # Adding the new tranche class to regex of selected tranches
+            added_classes = copy.deepcopy(selected_classes)
+            selected_classes[tranche_to_add] += selected_class.at[0, 'Class']
+            added_classes[tranche_to_add] = selected_class.at[0, 'Class']
+            
+            # Reforming regex strings
+            regex_previous = copy.deepcopy(regex)
+            regex_added = ''
+            regex = ''
+            for Tranche in range(0, 18):
+                regex += '[' + selected_classes[Tranche] + ']'
+            for Tranche in range(0, 18):
+                regex_added += '[' + added_classes[Tranche] + ']'
+            
+            # Recalculate the number of ligands selected
+            ligands_selected_previous = ligands_selected
+            ligands_selected = df_library_tranches[df_library_tranches.Tranche.str.contains(regex)]['LigandCount'].sum()
+            
+            # Print status
+            print("")
+            print("Previous tranche regex string: ", regex_previous)
+            print("Added tranche regex string:    ", regex_added)
+            print("Current tranche regex string:  ", regex)
+            print("Current number of ligands:     ", ligands_selected)
+        else:
+            print(f"Tranche {tranche_to_add} does not match the tranche_filter_regex. Skipping tranche...")
+            # Drop the unmatched tranche without adding it to the regex
+            df_tranche_scores = df_tranche_scores.drop(selected_class.index)
+        
     # electing subset of the last added tranche to prevent overselection
     print("Selecting subset of the last added tranche to prevent overselection ...")
 
