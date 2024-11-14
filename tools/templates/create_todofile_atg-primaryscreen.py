@@ -197,16 +197,15 @@ elif tranche_scoring_mode in ["tranche_min_score", "tranche_ave_score"]:
             
             # Printing status
             print("Total number of ligands selected: ", ligands_selected)
-            print("")
             
         else:
             print("The tranche does not match the tranche_filter_regex. Skipping tranche...")
-            print("")
         
         # Index
         i = i + 1
 
     # Create filtered dataframe
+    print()
     print("Preparing new todo file...")
     filtered_df = df_library_collections[df_library_collections['Selected'] == True].copy()
 
