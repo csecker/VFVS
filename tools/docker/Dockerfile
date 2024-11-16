@@ -15,9 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with VirtualFlow.  If not, see <https://www.gnu.org/licenses/>.
 
+
 FROM amazonlinux:2
 
-RUN yum update -y && yum -y install python3
+# Installing basic packages
+RUN yum update -y && yum -y install python3 wget gcc tar make gcc-c++ zlib-devel gzip which
+RUN yum install -y libicu libicu-devel
 RUN pip3 install boto3 pandas pyarrow
 
 ADD ./bin /opt/vf/tools/bin
@@ -26,11 +29,11 @@ ADD ./templates/*.sh /opt/vf/tools/templates/
 
 # Install Boost (1.59 or above)
 WORKDIR /tmp
-RUN wget -O boost_1_82_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.gz && \
-    tar -xvzf boost_1_82_0.tar.gz && \
-    cd boost_1_82_0 && \
+RUN wget -O boost_1_70_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz && \
+    tar -xvzf boost_1_70_0.tar.gz && \
+    cd boost_1_70_0 && \
     ./bootstrap.sh && \
-    ./b2 install && \
+    ./b2 install  --with-system --with-filesystem --with-thread --with-program_options || true && \
     ldconfig
 
 # Add VirtualFlow tools and templates
@@ -40,11 +43,11 @@ ADD ./templates/*.sh /opt/vf/tools/templates/
 
 # Download and install gwovina
 WORKDIR /tmp
-RUN wget -O gwovina-1.0.tar.gz https://sourceforge.net/projects/gwovina/files/gwovina-1.0.tar.gz/download
-RUN tar -xvzf gwovina-1.0.tar.gz
-RUN cd gwovina-1.0/build/linux/release
-RUN make
-RUN mv gwovina /usr/local/bin/
+RUN wget -q -O gwovina-1.0.tar.gz https://sourceforge.net/projects/gwovina/files/gwovina-1.0.tar.gz/download && \
+    tar -xzf gwovina-1.0.tar.gz && \
+    cd gwovina-1.0/build/linux/release && \
+    make && \
+    mv gwovina /usr/local/bin/
 
 # Cleanup temporary files
 RUN rm -rf /tmp/gwovina-1.0* /tmp/gwovina-1.0.tar.gz
