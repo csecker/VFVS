@@ -27,6 +27,9 @@ ADD ./bin /opt/vf/tools/bin
 ADD ./templates/*.py /opt/vf/tools/templates/
 ADD ./templates/*.sh /opt/vf/tools/templates/
 
+# Set library path
+ENV LD_LIBRARY_PATH="/usr/local/lib:$LD_LIBRARY_PATH"
+
 # Install Boost (1.59 or above)
 WORKDIR /tmp
 RUN wget -O boost_1_70_0.tar.gz https://boostorg.jfrog.io/artifactory/main/release/1.70.0/source/boost_1_70_0.tar.gz && \
@@ -47,7 +50,7 @@ RUN wget -q -O gwovina-1.0.tar.gz https://sourceforge.net/projects/gwovina/files
     tar -xzf gwovina-1.0.tar.gz && \
     cd gwovina-1.0/build/linux/release && \
     make && \
-    mv gwovina /usr/local/bin/
+    mv gwovina /opt/vf/tools/bin/gwovina
 
 # Cleanup temporary files
 RUN rm -rf /tmp/gwovina-1.0* /tmp/gwovina-1.0.tar.gz
