@@ -11,8 +11,8 @@ if [ "${1}" == "-h" ]; then
    echo -e "\n${usage}\n\n"
    exit 0
 fi
-if [ "$#" -e "0" ]; then
-   echo -e "\nWrong number of arguments. At least one screening size required."
+if [ "$#" -ne "0" ]; then
+   echo -e "\nWrong number of arguments."
    echo -e "\n${usage}\n\n"
    echo -e "Exiting..."
    exit 1
