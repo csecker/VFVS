@@ -51,7 +51,7 @@ def parse_config(filename):
 
     config['docking_scenario_names'] = config['docking_scenario_names'].split(
         ":")
-    config['docking_scenario_programs'] = config['docking_scenario_programs'].split(
+    config['docking_scenario_methods'] = config['docking_scenario_methods'].split(
         ":")
     config['docking_scenario_replicas'] = config['docking_scenario_replicas'].split(
         ":")
@@ -252,17 +252,17 @@ def check_parameters(config):
 
     config['object_store_job_prefix_full'] = f"{config['object_store_job_prefix']}/{config['job_letter']}"
 
-    if(empty_value(config, 'sensor_screen_mode')):
-        config['sensor_screen_mode'] = 0
-        config['sensor_screen_count'] = 0
-    elif(int(config['sensor_screen_mode']) == 1):
-        config['sensor_screen_mode'] = 1
-        if(empty_value(config, 'sensor_screen_count')):
-            print("* If 'sensor_screen_mode=1' then 'sensor_screen_count' must be set in all.ctrl")
+    if(empty_value(config, 'prescreen_mode')):
+        config['prescreen_mode'] = 0
+        config['prescreen_ligands_per_tranche'] = 0
+    elif(int(config['prescreen_mode']) == 1):
+        config['prescreen_mode'] = 1
+        if(empty_value(config, 'prescreen_ligands_per_tranche')):
+            print("* If 'prescreen_mode=1' then 'prescreen_ligands_per_tranche' must be set in all.ctrl")
         else:
-            config['sensor_screen_count'] = int(config['sensor_screen_count'])
+            config['prescreen_ligands_per_tranche'] = int(config['prescreen_ligands_per_tranche'])
     else:
-        config['sensor_screen_count'] = 0
+        config['prescreen_ligands_per_tranche'] = 0
 
     if(empty_value(config, 'run_pose_check')):
         config['run_pose_check'] = 0
@@ -347,8 +347,8 @@ then re-run vfvs_prepare_folders.py --skip_errors (Not recommended!)
     if(config['collection_list_type'] == "standard"):
 
         mode = "all"
-        if(config['sensor_screen_mode'] == 1):
-            mode = "sensor_screen_mode"
+        if(config['prescreen_mode'] == 1):
+            mode = "prescreen_mode"
 
         with open(config['collection_list_file'], "r") as read_file:
             for line in read_file:
@@ -359,8 +359,8 @@ then re-run vfvs_prepare_folders.py --skip_errors (Not recommended!)
                         'mode': mode
                     }
 
-                    if(mode == "sensor_screen_mode"):
-                        collection_key_ligands[collection_key]['sensor_screen_count'] = config['sensor_screen_count']
+                    if(mode == "prescreen_mode"):
+                        collection_key_ligands[collection_key]['prescreen_ligands_per_tranche'] = config['prescreen_ligands_per_tranche']
 
                 else:
                     print(f"{collection_key} had non positive int count of '{ligand_count}'")

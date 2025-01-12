@@ -221,8 +221,8 @@ def unpack_item(item):
         return None
 
     # Check if we have specific instructions
-    if(item['collection']['mode'] == "sensor_screen_mode"):
-        sensor_screen_ligands = {}
+    if(item['collection']['mode'] == "prescreen_mode"):
+        prescreen_ligands = {}
 
         # We should read the sparse file to know which ligands we actually need to keep
         with open(os.path.join(item['temp_dir'], item['collection']['collection_number'], ".listing"), "r") as read_file:
@@ -231,13 +231,13 @@ def unpack_item(item):
 
                 screen_collection_key, screen_ligand_name, screen_index = line.split(",")
 
-                if(int(screen_index) >= item['collection']['sensor_screen_count']):
+                if(int(screen_index) >= item['collection']['prescreen_ligands_per_tranche']):
                     continue
 
-                sensor_screen_ligands[screen_ligand_name] = ligands[screen_ligand_name]
-                sensor_screen_ligands[screen_ligand_name]['collection_key'] = screen_collection_key
+                prescreen_ligands[screen_ligand_name] = ligands[screen_ligand_name]
+                prescreen_ligands[screen_ligand_name]['collection_key'] = screen_collection_key
 
-        return sensor_screen_ligands
+        return prescreen_ligands
     elif(item['collection']['mode'] == "named"):
         select_ligands = {}
         for ligand_name in item['collection']['ligands']:
@@ -315,7 +315,38 @@ def collection_process(ctx, collection_queue, docking_queue, summary_queue):
                             break
                         coords[coord_str] = 1
 
+                    # Checking for dynamic tranche filtering
+                    if (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
+
+                        # Checking if the line contains the tranche
+                        match = re.search('Tranche:', line)
+                        if (match):
+                            # Obtaining the tranche
+                            parts = line.split()
+                            tranche  = parts[2].strip()
+
+                            # Compiling the user's regex
+                            try:
+                                compiled_regex = re.compile(ctx['main_config']['dynamic_tranche_filtering_regex'])
+                            except re.error as e:
+                                print(f"Invalid regular expression: {e}")
+                                return None
+
+                            # Search for the pattern in the test string
+                            match = compiled_regex.search(tranche)
+
+                            # Checking if the tranche is not part of the regex
+                            if not match:
+                                print(f" Skipping ligand {ligand} due to dynamic tranche filtering. Tranche of ligand: {tranche}, regex:{ctx['main_config']['dynamic_tranche_filtering_regex']}")
+                                #logging.error(f"Ligand {ligand} not contained in part of the library specified by regular expression. Skipping.")
+                                skip_reason = f"failed(dynamic_tranche_filtering)"
+                                skip_reason_json = f"dynamic tranche filtering"
+                                skip_ligand = 1
+                                break
+
+
             if(skip_ligand == 0):
+
                 # We can submit this for processing
                 ligand_attrs = get_attrs(ctx['main_config']['ligand_library_format'], ligand['path'], ctx['main_config']['print_attrs_in_summary'])
                 submit_ligand_for_docking(ctx, docking_queue, ligand_key, ligand['path'], ligand['collection_key'], ligand['base_collection_key'], ligand_attrs, item['temp_dir'])
@@ -1095,7 +1126,7 @@ def process_config(ctx):
     ctx['main_config']['docking_scenarios'] = {}
 
     for index, scenario in enumerate(ctx['main_config']['docking_scenario_names']):
-        program_long = ctx['main_config']['docking_scenario_programs'][index]
+        program_long = ctx['main_config']['docking_scenario_methods'][index]
         program = program_long
 
         # Special handing for smina* and gwovina*
@@ -4285,10 +4316,26 @@ def process(ctx):
 
         for collection_key in subjob['collections']:
             collection = subjob['collections'][collection_key]
-
             collection_name, collection_number = collection_key.split("_", maxsplit=1)
             collection['collection_number'] = collection_number
             collection['collection_name'] = collection_name
+
+            # Checking if dynamic tranche filtering is enabled and prescreen_mode is disabled (since the collections names in the prescreen mode do not have tranche names with properties encoded)
+            if (int(ctx['main_config']['prescreen_mode']) == 0) and (int(ctx['main_config']['dynamic_tranche_filtering']) == 1):
+
+                # Compiling the user's regex
+                try:
+                    compiled_regex = re.compile(ctx['main_config']['dynamic_tranche_filtering_regex'])
+                except re.error as e:
+                    print(f"Invalid regular expression: {e}")
+                    return None
+
+                match = re.search(compiled_regex, collection_name)
+
+                if not match:
+                    print(f" Skipping collection {collection_name} due to dynamic tranche filtering. Tranche of collection: {collection_name}, regex:{ctx['main_config']['dynamic_tranche_filtering_regex']}")
+                    #logging.error(f"Tranche {collection_name} not contained in part of the library specified by regular expression. Skipping.")
+                    break
 
             download_item = {
                 'collection_key': collection_key,
