@@ -725,7 +725,11 @@ def check_for_completion_of_collection_key(collection_completions, collection_ke
         for scenario_key, scenario_dest in scenario_directories.items():
             scenario_directory = Path(collection_completions[collection_key]['temp_dir']) / "output" / scenario_key
             for dir_file in scenario_directory.iterdir():
-                shutil.move(str(dir_file), f"{scenario_dest}/")
+                try:
+                    shutil.move(str(dir_file), f"{scenario_dest}/")
+                except shutil.Error as err:
+                    logging.error(f"Could not move {dir_file} to {scenario_dest}, skipping...")
+                    continue
 
         shutil.rmtree(collection_completions[collection_key]['temp_dir'])
         collection_completions.pop(collection_key, None)
