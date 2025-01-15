@@ -22,7 +22,7 @@ program_timeout=90
 ************************************************
 
 batchsystem=awsbatch
-# Possible values: awsbatch, slurm
+# Possible values: awsbatch, slurm, bash
 
 ****** AWS Batch Options (if batchsystem=awsbatch)
 
