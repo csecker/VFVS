@@ -112,7 +112,7 @@ def main():
       print("In order to use the query on Slurm runs, `csv` must be a summary_format")
       exit(1)
 
-  if ctx['config']['batchsystem'] != 'awsbatch' and ctx['config']['batchsystem'] != 'Slurm':
+  if ctx['config']['batchsystem'] != 'awsbatch' and ctx['config']['batchsystem'] != 'slurm':
     print("In order to use this query script, AWS or Slurm must be configured")
     exit(1)
 
