@@ -139,12 +139,12 @@ def publish_workunit(ctx, index, workunit_subjobs):
         return {'subjobs': compress_subjobs(ctx, workunit_subjobs), 's3_download_path': object_name}
 
     elif(ctx['config']['job_storage_mode'] == "sharedfs"):
-        
+
         # TODO: Update the hash setup
 
         sharedfs_workunit_path = Path(ctx['config']['sharedfs_workunit_path']) / f"{index}.tar.gz"
         shutil.copyfile(f'{temp_dir_tar.name}/{index}.tar.gz', sharedfs_workunit_path)
-        
+
         temp_dir.cleanup()
         temp_dir_tar.cleanup()
 
@@ -168,7 +168,7 @@ def compress_subjobs(ctx, subjobs):
 def generate_subjob_init():
 
     subjob_init = {
-        'collections': { 
+        'collections': {
         }
      }
 

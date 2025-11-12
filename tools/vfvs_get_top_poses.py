@@ -79,7 +79,7 @@ def get_top_results_slurm_csv(docking_scenario_output_folder):
     df_workunits = []
     pattern = re.compile(r'csv/(\d+)/(\d+)\.csv\.gz')
 
-    for f in tqdm(files, desc='Collection results', unit=' files'):
+    for f in tqdm(files, desc='Collecting results', unit=' files'):
         match = pattern.search(f)
         if match:
             workunit = int(match.group(1))
@@ -106,9 +106,9 @@ def extract_docking_pose(row):
 
     for idx, scenario in enumerate(scenarios):
         if len(scenarios) == 1:
-            scores = [(col, row_data[col]) for col in row_data.index if re.match(r'score_\d+$', col)]
+            scores = [(col, row_data[col]) for col in row_data.index if re.match(r'score_\d+(?:_\w+)?$', col)]
         else:
-            scores = [(col, row_data[col]) for col in row_data.index if re.match(r'score_\d+_' + scenario + '$', col)]
+            scores = [(col, row_data[col]) for col in row_data.index if re.match(r'score_\d+_' + re.escape(scenario) + r'(?:_\w+)?$', col)]
 
         scores_valid = []
         for score in scores:

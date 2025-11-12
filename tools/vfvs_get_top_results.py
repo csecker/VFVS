@@ -31,6 +31,7 @@ import glob
 import pandas as pd
 import re
 from tqdm import tqdm
+from typing import Optional
 
 
 def parse_config(filename):
@@ -79,7 +80,7 @@ def get_top_results_slurm_csv(docking_scenario_output_folder):
   df_workunits = []
   pattern = re.compile(r'csv/(\d+)/(\d+)\.csv\.gz')
 
-  for f in tqdm(files, desc='Collection results', unit=' files'):
+  for f in tqdm(files, desc='Collecting results', unit=' files'):
       match = pattern.search(f)
       if match:
           workunit = int(match.group(1))
@@ -95,6 +96,66 @@ def get_top_results_slurm_csv(docking_scenario_output_folder):
   df_all = pd.concat(df_workunits, axis=0, ignore_index=True)
   df_all = df_all.sort_values(by='score_min', ascending=True).reset_index(drop=True)
   return df_all
+
+
+def get_top_results_slurm_csv(
+    docking_scenario_output_folder: str,
+    top: Optional[int] = None,
+    chunksize: int = 200_000,
+):
+    """
+    Streaming top-k (smallest by 'score_min') over many CSV.GZ files, bounded memory.
+    """
+    files = glob.glob(os.path.join(docking_scenario_output_folder, 'csv', '*', '*.csv.gz'))
+
+    if len(files) < 1:
+        print(f"No results in {docking_scenario_output_folder} found, exiting...")
+        return None
+
+    pattern = re.compile(r'csv/(\d+)/(\d+)\.csv\.gz')
+
+    keep_df = None
+    have_score = False
+
+    for f in tqdm(files, desc='Collecting results', unit=' files'):
+        match = pattern.search(f)
+        workunit = int(match.group(1)) if match else 0
+        task = int(match.group(2)) if match else 0
+
+        for chunk in pd.read_csv(f, compression='gzip', sep=',', chunksize=chunksize):
+            chunk = chunk.assign(workunit=workunit, task=task)
+
+            if 'score_min' not in chunk.columns:
+                raise ValueError("Column 'score_min' not found in input CSVs.")
+            have_score = True
+
+            if top is None:
+                if keep_df is None:
+                    keep_df = chunk
+                else:
+                    keep_df = pd.concat([keep_df, chunk], axis=0, ignore_index=True)
+            else:
+                if len(chunk) > top:
+                    chunk = chunk.nsmallest(top, 'score_min')
+                if keep_df is None:
+                    keep_df = chunk
+                else:
+                    keep_df = pd.concat([keep_df, chunk], axis=0, ignore_index=True)
+
+                if len(keep_df) > int(top * 1.5):
+                    keep_df = keep_df.nsmallest(top, 'score_min')
+
+    if keep_df is None or (top is not None and len(keep_df) == 0):
+        return None
+
+    if not have_score:
+        raise ValueError("No 'score_min' present in any file.")
+
+    if top is not None:
+        keep_df = keep_df.nsmallest(top, 'score_min')
+
+    keep_df = keep_df.sort_values(by='score_min', ascending=True, kind='mergesort').reset_index(drop=True)
+    return keep_df
 
 
 def main():
@@ -134,6 +195,7 @@ def main():
 
 
   parser.add_argument('--top', action='store', type=int, required=False)
+  parser.add_argument('--chunksize', action='store', type=int, required=False, default=200000)
   args = parser.parse_args()
 
 
@@ -300,7 +362,12 @@ def main():
 
   elif ctx['config']['batchsystem'] == 'slurm':
     docking_scenario_output_folder = os.path.join('..', 'output-files', scenario)
-    results = get_top_results_slurm_csv(docking_scenario_output_folder)
+
+    results = get_top_results_slurm_csv(
+        docking_scenario_output_folder=docking_scenario_output_folder,
+        top=args_dict.get('top'),
+        chunksize=args_dict.get('chunksize') or 200000,
+    )
 
     if isinstance(results, pd.DataFrame):
       status = "SUCCEEDED"
@@ -317,7 +384,7 @@ def main():
     else:
       print(results.reset_index(drop=True))
 
-    if args_dict['download'] == True:
+    if args_dict['download'] == True and isinstance(results, pd.DataFrame):
       if 'top' in args_dict and args_dict['top'] != None:
         output_file = docking_scenario_output_folder + "." + ".ranking.top-" + str(args.top) + ".csv"
         results = results.head(args.top)
